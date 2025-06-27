@@ -1,9 +1,8 @@
-// Array de métodos ( C R U D )
-const tasksController = {};
-
 import TasksModel from "../models/Tasks.js";
 
-// SELECT (Obtener todas las tareas)
+const tasksController = {};
+
+// GET /tasks – Obtener todas las tareas
 tasksController.getTasks = async (req, res) => {
   try {
     const tasks = await TasksModel.find();
@@ -14,34 +13,34 @@ tasksController.getTasks = async (req, res) => {
   }
 };
 
-// INSERT (Crear una nueva tarea)
+// GET /tasks/:id – Obtener una tarea específica
+tasksController.getTaskById = async (req, res) => {
+  try {
+    const task = await TasksModel.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Tarea no encontrada" });
+    }
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener la tarea" });
+  }
+};
+
+// POST /tasks – Crear una nueva tarea
 tasksController.createTask = async (req, res) => {
   try {
     const { title, description, completed } = req.body;
     const newTask = new TasksModel({ title, description, completed });
     await newTask.save();
-    res.json({ message: "Tarea guardada exitosamente" });
+    res.status(201).json({ message: "Tarea guardada exitosamente" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al crear la tarea" });
   }
 };
 
-// DELETE (Eliminar una tarea)
-tasksController.deleteTask = async (req, res) => {
-  try {
-    const deleted = await TasksModel.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Tarea no encontrada" });
-    }
-    res.json({ message: "Tarea eliminada correctamente" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al eliminar la tarea" });
-  }
-};
-
-// UPDATE (Actualizar una tarea)
+// PUT /tasks/:id – Actualizar una tarea existente
 tasksController.putTask = async (req, res) => {
   try {
     const { title, description, completed } = req.body;
@@ -53,10 +52,24 @@ tasksController.putTask = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ message: "Tarea no encontrada para actualizar" });
     }
-    res.json({ message: "Tarea actualizada correctamente" });
+    res.json({ message: "Tarea actualizada correctamente", tarea: updated });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al actualizar la tarea" });
+  }
+};
+
+// DELETE /tasks/:id – Eliminar una tarea
+tasksController.deleteTask = async (req, res) => {
+  try {
+    const deleted = await TasksModel.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Tarea no encontrada" });
+    }
+    res.json({ message: "Tarea eliminada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al eliminar la tarea" });
   }
 };
 
